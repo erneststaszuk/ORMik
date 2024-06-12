@@ -1,5 +1,27 @@
 spring:
   application:
     name: ORMik
+  profiles:
+    active: ${ENVIRONMENT}
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/indexer
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    hikari:
+      data-source-properties:
+        reWriteBatchedInserts: true
+  jdbc:
+    template:
+      # Remember to set fetch size when using Postgres driver.
+      # See:
+      # https://franckpachot.medium.com/oracle-postgres-jdbc-fetch-size-3012d494712
+      # org.springframework.boot.autoconfigure.jdbc.JdbcProperties
+      fetch-size: 1000
   liquibase:
-    enabled: false
+    enabled: true
+    change-log: classpath:liquibase/changelog.xml
+  lifecycle:
+    timeout-per-shutdown-phase: 90s

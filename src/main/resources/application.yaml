@@ -1,5 +1,0 @@
-spring:
-  application:
-    name: ORMik
-  liquibase:
-    enabled: false
