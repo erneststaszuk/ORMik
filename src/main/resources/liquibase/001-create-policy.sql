@@ -1,5 +1,5 @@
 CREATE TABLE policy(
-  id BIGSERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   holder_party TEXT NOT NULL,
   insured_party TEXT NOT NULL,
   beneficiary_party TEXT NOT NULL,
