@@ -19,6 +19,9 @@ class PolicyTest : IntegrationTest {
   @Autowired
   lateinit var policyService: PolicyService
 
+  @Autowired
+  lateinit var policyReportsRepository: PolicyReportsRepository
+
   @Test
   fun `saved policy has id`() {
     // given
@@ -72,6 +75,20 @@ class PolicyTest : IntegrationTest {
 
     // then
     policyRepository.findAll() shouldHaveSize 2
+  }
+
+  @Test
+  fun `summarize premiums`() {
+    // given
+    val policy1 = Fixture.policy()
+    val policy2 = Fixture.policy()
+    policyRepository.saveAll(listOf(policy1, policy2))
+
+    // when
+    val premiumsSum = policyReportsRepository.queryPremiumsSum()
+
+    // then
+    premiumsSum shouldBeEqualTo (policy1.premium + policy2.premium)
   }
 }
 
