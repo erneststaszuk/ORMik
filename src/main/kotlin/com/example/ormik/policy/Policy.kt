@@ -1,8 +1,10 @@
 package com.example.ormik.policy
 
+import com.example.ormik.infrastructure.Transactionally
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
+import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -22,3 +24,17 @@ data class Policy(
 )
 
 interface PolicyRepository: CrudRepository<Policy, Long>
+
+@Service
+class PolicyService(
+  private val repository: PolicyRepository,
+  private val transactionally: Transactionally,
+){
+  fun saveAll(policies: Iterable<Policy>) {
+    transactionally {
+      policies.forEach {
+        repository.save(it)
+      }
+    }
+  }
+}
