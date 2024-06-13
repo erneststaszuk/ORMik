@@ -7,6 +7,7 @@ import org.amshove.kluent.shouldNotBeNull
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.util.UUID
 import kotlin.test.Test
 
 internal typealias bd = BigDecimal
@@ -94,7 +95,7 @@ class PolicyTest : IntegrationTest {
 
 object Fixture {
   fun policy(
-    id: Long? = null,
+    id: UUID? = null,
     holderParty: String = "Pan/Pani Holder",
     insuredParty: String = "Pan/Pani Insured",
     beneficiaryParty: String = "Pan/Pani Beneficiary",
