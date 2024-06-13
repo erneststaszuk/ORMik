@@ -4,6 +4,8 @@ import com.example.ormik.infrastructure.Transactionally
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.jdbc.repository.query.Query
+import org.springframework.data.relational.core.mapping.Embedded
+import org.springframework.data.relational.core.mapping.Embedded.OnEmpty
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
@@ -16,9 +18,7 @@ import java.util.UUID
 @Table
 data class Policy(
   @Id val id: UUID,
-  val holderParty: String,
-  val insuredParty: String,
-  val beneficiaryParty: String,
+  @Embedded(onEmpty = OnEmpty.USE_EMPTY) val parties: PolicyParties,
   val fromDate: LocalDate,
   val thruDate: LocalDate,
   val mainSumInsured: BigDecimal,
@@ -27,6 +27,12 @@ data class Policy(
   val ccbh17SumInsured: BigDecimal?,
   val premium: BigDecimal,
   @Version val version: Long = 0L,
+)
+
+data class PolicyParties (
+  val holderParty: String,
+  val insuredParty: String,
+  val beneficiaryParty: String,
 )
 
 interface PolicyRepository: CrudRepository<Policy, Long>

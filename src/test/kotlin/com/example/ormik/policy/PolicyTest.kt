@@ -101,7 +101,7 @@ class PolicyTest : IntegrationTest {
     println("Policy v1: $v1")
 
     // when
-    val v2 = v1.copy(beneficiaryParty = "new beneficiary party")
+    val v2 = v1.copy(parties = v1.parties.copy(beneficiaryParty = "new beneficiary party"))
     val savedV2 = policyRepository.save(v2)
     println("v2: $v2")
     println("savedV2: $savedV2")
@@ -127,9 +127,11 @@ object Fixture {
     premium: BigDecimal = bd("2140.15"),
   ) = Policy(
     id = id,
-    holderParty = holderParty,
-    insuredParty = insuredParty,
-    beneficiaryParty = beneficiaryParty,
+    PolicyParties(
+      holderParty = holderParty,
+      insuredParty = insuredParty,
+      beneficiaryParty = beneficiaryParty,
+    ),
     fromDate = fromDate,
     thruDate = thruDate,
     mainSumInsured = mainSumInsured,
