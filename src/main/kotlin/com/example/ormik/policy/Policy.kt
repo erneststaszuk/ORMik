@@ -2,9 +2,12 @@ package com.example.ormik.policy
 
 import com.example.ormik.infrastructure.Transactionally
 import org.springframework.data.annotation.Id
+import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
+import org.springframework.stereotype.Repository
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -24,6 +27,14 @@ data class Policy(
 )
 
 interface PolicyRepository: CrudRepository<Policy, Long>
+
+@Repository
+interface PolicyReportsRepository: org.springframework.data.repository.Repository<Policy, Long> {
+
+  @Query("SELECT sum(premium) FROM policy")
+  @Transactional(readOnly = true)
+  fun queryPremiumsSum(): BigDecimal
+}
 
 @Service
 class PolicyService(
