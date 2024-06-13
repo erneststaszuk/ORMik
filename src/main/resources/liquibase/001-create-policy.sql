@@ -1,5 +1,5 @@
 CREATE TABLE policy(
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  id UUID PRIMARY KEY,
   holder_party TEXT NOT NULL,
   insured_party TEXT NOT NULL,
   beneficiary_party TEXT NOT NULL,
@@ -9,5 +9,6 @@ CREATE TABLE policy(
   hsdr17_sum_insured DECIMAL(10,2),
   ccb17_sum_insured DECIMAL(10,2),
   ccbh17_sum_insured DECIMAL(10,2),
-  premium DECIMAL(10,2) NOT NULL
+  premium DECIMAL(10,2) NOT NULL,
+  version BIGINT NOT NULL
 );

@@ -34,7 +34,7 @@ class PolicyTest : IntegrationTest {
 
     // then
     println("Saved policy: $saved")
-    saved shouldBeEqualTo policy.copy(id = saved.id)
+    saved shouldBeEqualTo policy.copy(id = saved.id, version = 1L)
     saved.id.shouldNotBeNull()
   }
 
@@ -91,11 +91,30 @@ class PolicyTest : IntegrationTest {
     // then
     premiumsSum shouldBeEqualTo (policy1.premium + policy2.premium)
   }
+
+  @Test
+  fun `save policy changes`() {
+    // given
+    val policy = Fixture.policy()
+    val v1 = policyRepository.save(policy)
+    println("Policy: $policy")
+    println("Policy v1: $v1")
+
+    // when
+    val v2 = v1.copy(beneficiaryParty = "new beneficiary party")
+    val savedV2 = policyRepository.save(v2)
+    println("v2: $v2")
+    println("savedV2: $savedV2")
+
+    // then
+    savedV2 shouldBeEqualTo v2.copy(version = v2.version + 1)
+    savedV2.version shouldBeEqualTo 2
+  }
 }
 
 object Fixture {
   fun policy(
-    id: UUID? = null,
+    id: UUID = UUID.randomUUID(),
     holderParty: String = "Pan/Pani Holder",
     insuredParty: String = "Pan/Pani Insured",
     beneficiaryParty: String = "Pan/Pani Beneficiary",

@@ -2,6 +2,7 @@ package com.example.ormik.policy
 
 import com.example.ormik.infrastructure.Transactionally
 import org.springframework.data.annotation.Id
+import org.springframework.data.annotation.Version
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
@@ -14,7 +15,7 @@ import java.util.UUID
 
 @Table
 data class Policy(
-  @Id val id: UUID? = null,
+  @Id val id: UUID,
   val holderParty: String,
   val insuredParty: String,
   val beneficiaryParty: String,
@@ -25,6 +26,7 @@ data class Policy(
   val ccb17SumInsured: BigDecimal?,
   val ccbh17SumInsured: BigDecimal?,
   val premium: BigDecimal,
+  @Version val version: Long = 0L,
 )
 
 interface PolicyRepository: CrudRepository<Policy, Long>
