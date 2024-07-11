@@ -35,19 +35,19 @@ class PolicyReportsTest: IntegrationTest {
         val policy1 = Fixture.policy(fromDate = LocalDate.of(2024, 6, 1), thruDate = LocalDate.of(2025, 5, 31))
         val policy2 = Fixture.policy(fromDate = LocalDate.of(2024, 7, 1), thruDate = LocalDate.of(2025, 6, 30))
         val policy3 = Fixture.policy(fromDate = LocalDate.of(2023, 3, 1), thruDate = LocalDate.of(2024, 4, 29))
-        policyRepository.saveAll(listOf(policy1, policy2, policy3))
+        val savedPolicies = policyRepository.saveAll(listOf(policy1, policy2, policy3)).toList()
 
         // when
         val policies1 = policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2024, 7, 11))
 
         // then
-        policies1 shouldContainSame setOf(policy1.nextVersion(), policy2.nextVersion())
+        policies1 shouldContainSame setOf(savedPolicies[0], savedPolicies[1])
 
         // when
         val policies2 = policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2023, 7, 11))
 
         // then
-        policies2 shouldContainSame setOf(policy3.nextVersion())
+        policies2 shouldContainSame setOf(savedPolicies[2])
     }
 }
 
