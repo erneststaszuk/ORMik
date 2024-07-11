@@ -45,27 +45,24 @@ class PolicyReportsTest : IntegrationTest {
         policyRepository.saveAll(listOf(policy1, policy2, policy3))
 
         // when
-        val policies1 = transactionally {
-            policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2024, 7, 11)).use {
-                it.toList()
-            }
+        val policies1 = policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2024, 7, 11)).use {
+            it.toList()
         }
 
         // then
         policies1 shouldContainSame setOf(policy1.nextVersion(), policy2.nextVersion())
 
         // when
-        val policies2 = transactionally {
-            policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2023, 7, 11)).toList()
+        val policies2 = policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2023, 7, 11)).use {
+            it.toList()
         }
 
         // then
         policies2 shouldContainSame setOf(policy3.nextVersion())
 
         // expect
-        invoking {
-            policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2023, 7, 11)).toList()
-        } shouldThrow InvalidResultSetAccessException::class
+        // BAD PRACTICE
+        policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2023, 7, 11)).toList()
     }
 }
 
