@@ -3,12 +3,10 @@ package com.example.ormik.policy
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.relational.core.mapping.Table
-import org.springframework.data.relational.core.sql.In
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
-import java.math.MathContext
 import java.math.RoundingMode
 import java.time.LocalDate
 import java.util.UUID
@@ -31,16 +29,14 @@ interface InstalmentRepository: CrudRepository<Instalment, UUID> {
 class InstalmentService(private val repository: InstalmentRepository) {
     fun createInstalments(policy: Policy, paymentInterval: PaymentInterval) {
         val policyInstalments = when(paymentInterval) {
-            PaymentInterval.ANNUAL -> listOf(
-                createInstalment(policy, policy.premium, policy.fromDate.minusDays(1))
-            )
+            PaymentInterval.ANNUAL -> createSingleInstalment(policy)
             PaymentInterval.MONTHLY -> createMonthlyInstallments(policy)
         }
         repository.saveAll(policyInstalments)
     }
 
-    private fun createSingleInstalment(policy: Policy) =
-        createInstalment(policy, policy.premium, policy.fromDate.minusDays(1))
+    private fun createSingleInstalment(policy: Policy): List<Instalment> =
+        listOf(createInstalment(policy, policy.premium, policy.fromDate.minusDays(1)))
 
     private fun createInstalment(policy: Policy, amount: BigDecimal, due: LocalDate) = Instalment(
         id = UUID.randomUUID(),

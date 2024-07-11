@@ -3,11 +3,7 @@ package com.example.ormik.policy
 import com.example.ormik.IntegrationTest
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldHaveSize
-import org.amshove.kluent.shouldNotBeNull
 import org.springframework.beans.factory.annotation.Autowired
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.util.UUID
 import kotlin.test.Test
 
 class PolicyServiceTest : IntegrationTest {
@@ -24,7 +20,7 @@ class PolicyServiceTest : IntegrationTest {
     val policy = Fixture.policy()
 
     // when
-    val saved = policyService.createPolicy(policy, PaymentInterval.MONTHLY)
+    policyService.createPolicy(policy, PaymentInterval.MONTHLY)
 
     // then
     val instalments = instalmentRepository.findAllByPolicyId(policy.id)
