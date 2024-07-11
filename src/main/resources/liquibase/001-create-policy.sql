@@ -10,5 +10,6 @@ CREATE TABLE policy(
   ccb17_sum_insured DECIMAL(10,2),
   ccbh17_sum_insured DECIMAL(10,2),
   premium DECIMAL(10,2) NOT NULL,
+  is_active BOOLEAN NOT NULL,
   version BIGINT NOT NULL
 );

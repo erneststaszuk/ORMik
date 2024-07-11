@@ -25,6 +25,7 @@ data class Policy(
     @MappedCollection(idColumn = "policy_id", keyColumn = "seq_order")
     val selectedRisks: List<SelectedRisk>,
     val premium: BigDecimal,
+    val isActive: Boolean = false,
     @Version val version: Long = 0L,
 ) {
     init {
@@ -38,7 +39,7 @@ data class PolicyParties(
     val beneficiaryParty: String,
 )
 
-@Table()
+@Table
 data class SelectedRisk(
     val riskCode: String,
     val sumInsured: BigDecimal

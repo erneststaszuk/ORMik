@@ -2,6 +2,7 @@ package com.example.ormik.policy
 
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
+import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Service
@@ -18,21 +19,28 @@ data class Instalment(
     val amount: BigDecimal,
     val due: LocalDate,
     val isPaid: Boolean,
+)
+
+@Table
+data class PolicyInstalments(
+    @Id val policyId: UUID,
+    @MappedCollection(idColumn = "policy_id", keyColumn = "seqIndex")
+    val instalments: List<Instalment>,
     @Version val version: Long = 0L,
 )
 
-interface InstalmentRepository: CrudRepository<Instalment, UUID> {
-    fun findAllByPolicyId(policyId: UUID): List<Instalment>
+interface InstalmentsRepository: CrudRepository<PolicyInstalments, UUID> {
+    fun findByPolicyId(policyId: UUID): PolicyInstalments
 }
 
 @Service
-class InstalmentService(private val repository: InstalmentRepository) {
+class InstalmentService(private val repository: InstalmentsRepository) {
     fun createInstalments(policy: Policy, paymentInterval: PaymentInterval) {
         val policyInstalments = when(paymentInterval) {
             PaymentInterval.ANNUAL -> createSingleInstalment(policy)
             PaymentInterval.MONTHLY -> createMonthlyInstallments(policy)
         }
-        repository.saveAll(policyInstalments)
+        repository.save(PolicyInstalments(policy.id, policyInstalments))
     }
 
     private fun createSingleInstalment(policy: Policy): List<Instalment> =
@@ -58,6 +66,10 @@ class InstalmentService(private val repository: InstalmentRepository) {
                     createInstalment(policy, monthlyPremium, firstDue.plusMonths(monthsAfterFirstInstalment))
                 }.toTypedArray()
         )
+    }
+
+    fun payAmount(amount: BigDecimal, currentDate: LocalDate) {
+        TODO()
     }
 
     companion object {
