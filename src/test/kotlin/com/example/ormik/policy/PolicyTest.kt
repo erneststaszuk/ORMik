@@ -69,7 +69,8 @@ class PolicyTest : IntegrationTest {
     val policy2 = Fixture.policy()
 
     // when
-    policyService.saveAll(listOf(policy1, policy2))
+    policyService.createPolicy(policy1)
+    policyService.createPolicy(policy2)
 
     // then
     policyRepository.findAll() shouldHaveSize 2

@@ -12,4 +12,8 @@
   <changeSet id="1720689936900-1" author="Ernest Staszuk">
     <sqlFile path="002-create-selected-risk.sql" relativeToChangelogFile="true"/>
   </changeSet>
+
+  <changeSet id="1720691292751-1" author="Ernest Staszuk">
+    <sqlFile path="003-create-instalments.sql" relativeToChangelogFile="true"/>
+  </changeSet>
 </databaseChangeLog>

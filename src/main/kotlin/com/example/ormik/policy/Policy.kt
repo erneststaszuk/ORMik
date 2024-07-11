@@ -18,54 +18,55 @@ import java.util.stream.Stream
 
 @Table
 data class Policy(
-  @Id val id: UUID,
-  @Embedded(onEmpty = OnEmpty.USE_EMPTY) val parties: PolicyParties,
-  val fromDate: LocalDate,
-  val thruDate: LocalDate,
-  @MappedCollection(idColumn = "policy_id", keyColumn = "seq_order")
-  val selectedRisks: List<SelectedRisk>,
-  val premium: BigDecimal,
-  @Version val version: Long = 0L,
+    @Id val id: UUID,
+    @Embedded(onEmpty = OnEmpty.USE_EMPTY) val parties: PolicyParties,
+    val fromDate: LocalDate,
+    val thruDate: LocalDate,
+    @MappedCollection(idColumn = "policy_id", keyColumn = "seq_order")
+    val selectedRisks: List<SelectedRisk>,
+    val premium: BigDecimal,
+    @Version val version: Long = 0L,
 ) {
-  init {
+    init {
 
-  }
+    }
 }
 
-data class PolicyParties (
-  val holderParty: String,
-  val insuredParty: String,
-  val beneficiaryParty: String,
+data class PolicyParties(
+    val holderParty: String,
+    val insuredParty: String,
+    val beneficiaryParty: String,
 )
 
 @Table()
-data class SelectedRisk (
-  val riskCode: String,
-  val sumInsured: BigDecimal
+data class SelectedRisk(
+    val riskCode: String,
+    val sumInsured: BigDecimal
 )
 
-interface PolicyRepository: CrudRepository<Policy, Long>
+interface PolicyRepository : CrudRepository<Policy, UUID>
 
 @Repository
-interface PolicyReportsRepository: org.springframework.data.repository.Repository<Policy, Long> {
+interface PolicyReportsRepository : org.springframework.data.repository.Repository<Policy, Long> {
 
-  @Query("SELECT sum(premium) FROM policy")
-  fun queryPremiumsSum(): BigDecimal
+    @Query("SELECT sum(premium) FROM policy")
+    fun queryPremiumsSum(): BigDecimal
 
-  @Query("SELECT * FROM policy WHERE from_date <= :atDate AND :atDate <= thru_date")
-  fun findPoliciesActiveAtDate(atDate: LocalDate): Stream<Policy>
+    @Query("SELECT * FROM policy WHERE from_date <= :atDate AND :atDate <= thru_date")
+    fun findPoliciesActiveAtDate(atDate: LocalDate): Stream<Policy>
 }
 
 @Service
 class PolicyService(
-  private val repository: PolicyRepository,
-  private val transactionally: Transactionally,
-){
-  fun saveAll(policies: Iterable<Policy>) {
-    transactionally {
-      policies.forEach {
-        repository.save(it)
-      }
-    }
-  }
+    private val repository: PolicyRepository,
+    private val instalmentService: InstalmentService,
+    private val transactionally: Transactionally,
+) {
+    fun createPolicy(policy: Policy, paymentInterval: PaymentInterval = PaymentInterval.ANNUAL): Policy =
+        transactionally {
+            repository.save(policy).also {
+                instalmentService.createInstalments(it, paymentInterval)
+            }
+        }
 }
+
