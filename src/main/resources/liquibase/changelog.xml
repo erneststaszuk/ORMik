@@ -8,4 +8,8 @@
   <changeSet id="1718237600021-1" author="Ernest Staszuk">
     <sqlFile path="001-create-policy.sql" relativeToChangelogFile="true"/>
   </changeSet>
+
+  <changeSet id="1720689936900-1" author="Ernest Staszuk">
+    <sqlFile path="002-create-selected-risk.sql" relativeToChangelogFile="true"/>
+  </changeSet>
 </databaseChangeLog>

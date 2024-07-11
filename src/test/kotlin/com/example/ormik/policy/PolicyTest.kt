@@ -117,10 +117,12 @@ object Fixture {
     ),
     fromDate = fromDate,
     thruDate = thruDate,
-    mainSumInsured = mainSumInsured,
-    hsdr17SumInsured = hsdr17SumInsured,
-    ccb17SumInsured = ccb17SumInsured,
-    ccbh17SumInsured = ccbh17SumInsured,
+    selectedRisks = setOfNotNull(
+      SelectedRisk("MAIN", mainSumInsured),
+      hsdr17SumInsured?.let { SelectedRisk("HSDR_17", mainSumInsured) },
+      ccb17SumInsured?.let { SelectedRisk("CCB_17", mainSumInsured) },
+      ccbh17SumInsured?.let { SelectedRisk("CCBH_17", mainSumInsured) },
+    ),
     premium = premium,
   )
 }

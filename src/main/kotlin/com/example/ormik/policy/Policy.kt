@@ -21,10 +21,7 @@ data class Policy(
   @Embedded(onEmpty = OnEmpty.USE_EMPTY) val parties: PolicyParties,
   val fromDate: LocalDate,
   val thruDate: LocalDate,
-  val mainSumInsured: BigDecimal,
-  val hsdr17SumInsured: BigDecimal?,
-  val ccb17SumInsured: BigDecimal?,
-  val ccbh17SumInsured: BigDecimal?,
+  val selectedRisks: Set<SelectedRisk>,
   val premium: BigDecimal,
   @Version val version: Long = 0L,
 )
@@ -33,6 +30,12 @@ data class PolicyParties (
   val holderParty: String,
   val insuredParty: String,
   val beneficiaryParty: String,
+)
+
+@Table()
+data class SelectedRisk (
+  val riskCode: String,
+  val sumInsured: BigDecimal
 )
 
 interface PolicyRepository: CrudRepository<Policy, Long>
