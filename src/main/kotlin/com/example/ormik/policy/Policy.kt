@@ -43,6 +43,10 @@ interface PolicyReportsRepository: org.springframework.data.repository.Repositor
   @Query("SELECT sum(premium) FROM policy")
   @Transactional(readOnly = true)
   fun queryPremiumsSum(): BigDecimal
+
+  @Query("SELECT * FROM policy WHERE from_date <= :atDate AND :atDate <= thru_date")
+  @Transactional(readOnly = true)
+  fun findPoliciesActiveAtDate(atDate: LocalDate): List<Policy>
 }
 
 @Service

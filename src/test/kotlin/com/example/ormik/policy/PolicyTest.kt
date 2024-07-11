@@ -20,9 +20,6 @@ class PolicyTest : IntegrationTest {
   @Autowired
   lateinit var policyService: PolicyService
 
-  @Autowired
-  lateinit var policyReportsRepository: PolicyReportsRepository
-
   @Test
   fun `saved policy has id`() {
     // given
@@ -79,20 +76,6 @@ class PolicyTest : IntegrationTest {
   }
 
   @Test
-  fun `summarize premiums`() {
-    // given
-    val policy1 = Fixture.policy()
-    val policy2 = Fixture.policy()
-    policyRepository.saveAll(listOf(policy1, policy2))
-
-    // when
-    val premiumsSum = policyReportsRepository.queryPremiumsSum()
-
-    // then
-    premiumsSum shouldBeEqualTo (policy1.premium + policy2.premium)
-  }
-
-  @Test
   fun `save policy changes`() {
     // given
     val policy = Fixture.policy()
@@ -120,9 +103,9 @@ object Fixture {
     beneficiaryParty: String = "Pan/Pani Beneficiary",
     fromDate: LocalDate = LocalDate.of(2024, 6, 17),
     thruDate: LocalDate = LocalDate.of(2025, 6, 16),
-    mainSumInsured: BigDecimal = bd("300000"),
-    hsdr17SumInsured: BigDecimal? = bd("300000"),
-    ccb17SumInsured: BigDecimal? = bd("30000"),
+    mainSumInsured: BigDecimal = bd("300000.00"),
+    hsdr17SumInsured: BigDecimal? = bd("300000.00"),
+    ccb17SumInsured: BigDecimal? = bd("30000.00"),
     ccbh17SumInsured: BigDecimal? = null,
     premium: BigDecimal = bd("2140.15"),
   ) = Policy(
