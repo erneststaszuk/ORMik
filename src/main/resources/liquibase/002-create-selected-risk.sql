@@ -1,9 +1,10 @@
 CREATE TABLE selected_risk(
-  policy UUID NOT NULL REFERENCES policy (id),
+  policy_id UUID NOT NULL REFERENCES policy (id),
   risk_code TEXT NOT NULL,
   sum_insured DECIMAL(10,2) NOT NULL,
+  seq_order INTEGER NOT NULL,
 
-  PRIMARY KEY (policy, risk_code)
+  PRIMARY KEY (policy_id, risk_code)
 );
 
 INSERT INTO selected_risk (SELECT policy.id, 'MAIN', policy.main_sum_insured FROM policy);

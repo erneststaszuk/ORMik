@@ -93,6 +93,24 @@ class PolicyTest : IntegrationTest {
     savedV2 shouldBeEqualTo v2.copy(version = v2.version + 1)
     savedV2.version shouldBeEqualTo 2
   }
+
+  @Test
+  fun `remove risk from policy`() {
+    // given
+    val policy = Fixture.policy()
+    val v1 = policyRepository.save(policy)
+    println("Policy: $policy")
+    println("Policy v1: $v1")
+
+    // when
+    val v2 = v1.copy(selectedRisks = v1.selectedRisks.filter { it.riskCode != "CCBH_17" })
+    val savedV2 = policyRepository.save(v2)
+    println("v2: $v2")
+    println("savedV2: $savedV2")
+
+    // then
+    savedV2 shouldBeEqualTo v2.nextVersion()
+  }
 }
 
 object Fixture {
@@ -117,7 +135,7 @@ object Fixture {
     ),
     fromDate = fromDate,
     thruDate = thruDate,
-    selectedRisks = setOfNotNull(
+    selectedRisks = listOfNotNull(
       SelectedRisk("MAIN", mainSumInsured),
       hsdr17SumInsured?.let { SelectedRisk("HSDR_17", mainSumInsured) },
       ccb17SumInsured?.let { SelectedRisk("CCB_17", mainSumInsured) },

@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Version
 import org.springframework.data.jdbc.repository.query.Query
 import org.springframework.data.relational.core.mapping.Embedded
 import org.springframework.data.relational.core.mapping.Embedded.OnEmpty
+import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
@@ -21,10 +22,15 @@ data class Policy(
   @Embedded(onEmpty = OnEmpty.USE_EMPTY) val parties: PolicyParties,
   val fromDate: LocalDate,
   val thruDate: LocalDate,
-  val selectedRisks: Set<SelectedRisk>,
+  @MappedCollection(idColumn = "policy_id", keyColumn = "seq_order")
+  val selectedRisks: List<SelectedRisk>,
   val premium: BigDecimal,
   @Version val version: Long = 0L,
-)
+) {
+  init {
+
+  }
+}
 
 data class PolicyParties (
   val holderParty: String,
