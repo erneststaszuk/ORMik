@@ -24,7 +24,7 @@ data class Instalment(
 @Table
 data class PolicyInstalments(
     @Id val policyId: UUID,
-    @MappedCollection(idColumn = "policy_id", keyColumn = "seqIndex")
+    @MappedCollection(idColumn = "policy_id", keyColumn = "seq_index")
     val instalments: List<Instalment>,
     @Version val version: Long = 0L,
 )
