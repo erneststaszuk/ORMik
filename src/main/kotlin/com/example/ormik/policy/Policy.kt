@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.util.UUID
+import java.util.stream.Stream
 
 @Table
 data class Policy(
@@ -46,7 +47,7 @@ interface PolicyReportsRepository: org.springframework.data.repository.Repositor
 
   @Query("SELECT * FROM policy WHERE from_date <= :atDate AND :atDate <= thru_date")
   @Transactional(readOnly = true)
-  fun findPoliciesActiveAtDate(atDate: LocalDate): List<Policy>
+  fun findPoliciesActiveAtDate(atDate: LocalDate): Stream<Policy>
 }
 
 @Service

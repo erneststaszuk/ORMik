@@ -1,19 +1,26 @@
 package com.example.ormik.policy
 
 import com.example.ormik.IntegrationTest
+import com.example.ormik.infrastructure.Transactionally
+import org.amshove.kluent.invoking
 import org.amshove.kluent.shouldBeEqualTo
 import org.amshove.kluent.shouldContainSame
+import org.amshove.kluent.shouldThrow
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.InvalidResultSetAccessException
 import java.time.LocalDate
 import kotlin.test.Test
 
-class PolicyReportsTest: IntegrationTest {
+class PolicyReportsTest : IntegrationTest {
 
     @Autowired
     lateinit var policyRepository: PolicyRepository
 
     @Autowired
     lateinit var policyReportsRepository: PolicyReportsRepository
+
+    @Autowired
+    lateinit var transactionally: Transactionally
 
     @Test
     fun `summarize premiums`() {
@@ -38,16 +45,27 @@ class PolicyReportsTest: IntegrationTest {
         policyRepository.saveAll(listOf(policy1, policy2, policy3))
 
         // when
-        val policies1 = policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2024, 7, 11))
+        val policies1 = transactionally {
+            policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2024, 7, 11)).use {
+                it.toList()
+            }
+        }
 
         // then
         policies1 shouldContainSame setOf(policy1.nextVersion(), policy2.nextVersion())
 
         // when
-        val policies2 = policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2023, 7, 11))
+        val policies2 = transactionally {
+            policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2023, 7, 11)).toList()
+        }
 
         // then
         policies2 shouldContainSame setOf(policy3.nextVersion())
+
+        // expect
+        invoking {
+            policyReportsRepository.findPoliciesActiveAtDate(LocalDate.of(2023, 7, 11)).toList()
+        } shouldThrow InvalidResultSetAccessException::class
     }
 }
 
