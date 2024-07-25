@@ -11,7 +11,7 @@ class InstalmentServiceTest : IntegrationTest {
   lateinit var policyService: PolicyService
 
   @Autowired
-  lateinit var instalmentsRepository: InstalmentsRepository
+  lateinit var policyWalletRepository: PolicyWalletRepository
 
   @Test
   fun `create policy with monthly instalments`() {
@@ -22,7 +22,7 @@ class InstalmentServiceTest : IntegrationTest {
     policyService.createPolicy(policy, PaymentInterval.MONTHLY)
 
     // then
-    val instalments = instalmentsRepository.findByPolicyId(policy.id)
+    val instalments = policyWalletRepository.findByPoliciesIdsContains(policy.id.toPolicyRef())
     instalments.instalments shouldHaveSize 12
   }
 }

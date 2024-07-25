@@ -26,6 +26,7 @@ data class Policy(
     val selectedRisks: List<SelectedRisk>,
     val premium: BigDecimal,
     val isActive: Boolean = false,
+    val isPaidTo: LocalDate? = null,
     @Version val version: Long = 0L,
 ) {
     init {
@@ -64,8 +65,12 @@ class PolicyService(
     private val transactionally: Transactionally,
 ) {
     fun createPolicy(policy: Policy, paymentInterval: PaymentInterval = PaymentInterval.ANNUAL): Policy =
+        createPoliciesWallet(setOf(policy), paymentInterval)
+            .single()
+
+    fun createPoliciesWallet(policies: Set<Policy>, paymentInterval: PaymentInterval = PaymentInterval.ANNUAL): Set<Policy> =
         transactionally {
-            repository.save(policy).also {
+            repository.saveAll(policies).toSet().also {
                 instalmentService.createInstalments(it, paymentInterval)
             }
         }
