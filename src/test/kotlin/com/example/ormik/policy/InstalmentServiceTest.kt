@@ -36,7 +36,7 @@ class InstalmentServiceTest : IntegrationTest {
   }
 
   @Test
-  fun `should pay for all policies`() {
+  fun `should pay for all policies for 2 months`() {
     // given
     val policyA = Fixture.policy()
     val policyB = Fixture.policy()
@@ -45,15 +45,35 @@ class InstalmentServiceTest : IntegrationTest {
 
     // when
     val instalmentList = installmentListRepository.findById(installmentListRepository.findInstallmentListIdByPolicy(policies.first().id)).get()
-    instalmentList.installments.first()
     instalmentService.payAmount(instalmentList, BigDecimal("2140.15") * BigDecimal(4), LocalDate.of(2024, 6, 16))
 
     // then
+    val paidInstallmentList = installmentListRepository.findById(instalmentList.id).get()
+    paidInstallmentList.saldo shouldBeEqualTo BigDecimal("0.00")
     val paidPolicyA = policyRepository.findById(policyA.id).get()
     val paidPolicyB = policyRepository.findById(policyB.id).get()
     paidPolicyA.isPaidTo shouldBeEqualTo LocalDate.of(2024, 7, 16)
     paidPolicyB.isPaidTo shouldBeEqualTo LocalDate.of(2024, 7, 16)
+  }
+
+  @Test
+  fun `should pay for all policies and left saldo`() {
+    // given
+    val policyA = Fixture.policy()
+    val policyB = Fixture.policy()
+    val policies = setOf(policyA, policyB)
+    policyService.createPoliciesWallet(policies, PaymentInterval.MONTHLY)
+
+    // when
+    val instalmentList = installmentListRepository.findById(installmentListRepository.findInstallmentListIdByPolicy(policies.first().id)).get()
+    instalmentService.payAmount(instalmentList, BigDecimal("2140.15") * BigDecimal(3), LocalDate.of(2024, 6, 16))
+
+    // then
     val paidInstallmentList = installmentListRepository.findById(instalmentList.id).get()
-    paidInstallmentList.saldo shouldBeEqualTo BigDecimal("0.00")
+    paidInstallmentList.saldo shouldBeEqualTo BigDecimal("2140.15")
+    val paidPolicyA = policyRepository.findById(policyA.id).get()
+    val paidPolicyB = policyRepository.findById(policyB.id).get()
+    paidPolicyA.isPaidTo shouldBeEqualTo LocalDate.of(2024, 6, 16)
+    paidPolicyB.isPaidTo shouldBeEqualTo LocalDate.of(2024, 6, 16)
   }
 }

@@ -124,7 +124,8 @@ class InstalmentService(private val repository: InstallmentListRepository) {
     }
 
     fun payAmount(installmentList: InstallmentList, amount: BigDecimal, currentDate: LocalDate): InstallmentList {
-        return installmentList.payAmount(amount, currentDate)
+        val changedInstallmentList = installmentList.payAmount(amount, currentDate)
+        return repository.save(changedInstallmentList)
     }
 
     companion object {
