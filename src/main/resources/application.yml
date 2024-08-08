@@ -25,3 +25,9 @@ spring:
     change-log: classpath:liquibase/changelog.xml
   lifecycle:
     timeout-per-shutdown-phase: 90s
+
+bus:
+  topics:
+    - name: installment.policies_paid
+      subscriptions:
+        - policy.policies_paid

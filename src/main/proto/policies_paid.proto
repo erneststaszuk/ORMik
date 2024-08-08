@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package com.modivo.ads.proto;
+
+import "google/protobuf/timestamp.proto";
+
+message PoliciesPaid {
+  string eventId = 1;
+  repeated string policiesId = 2;
+  uint64 paidTo = 3;
+  uint64 eventTimestamp = 4;
+}

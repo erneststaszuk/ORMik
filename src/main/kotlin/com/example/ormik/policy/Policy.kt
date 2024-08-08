@@ -1,6 +1,11 @@
 package com.example.ormik.policy
 
 import com.example.ormik.infrastructure.Transactionally
+import com.example.ormik.infrastructure.busmock.EventHandler
+import com.example.ormik.infrastructure.busmock.SubscriptionName
+import com.example.ormik.outbox.OutboxMessage
+import com.google.protobuf.util.JsonFormat.Parser
+import com.modivo.ads.proto.PoliciesPaidOuterClass.PoliciesPaid
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.annotation.Id
@@ -113,3 +118,22 @@ class PolicyService(
     }
 }
 
+@Service
+class PoliciesEventHandler(private val policyService: PolicyService) : EventHandler {
+    override val subscriptionName: SubscriptionName
+        get() = POLICIES_PAID_SUBSCRIPTION
+
+    override fun handle(message: OutboxMessage) {
+        if (message.type == PoliciesPaid::class.qualifiedName) {
+            val parsed = PoliciesPaid.parser().parseFrom(message.payload)
+            policyService.payPoliciesUpTo(
+                policiesIds = parsed.policiesIdList.map { UUID.fromString(it) }.toSet(),
+                payTo = LocalDate.ofEpochDay(parsed.paidTo)
+            )
+        }
+    }
+
+    companion object {
+        const val POLICIES_PAID_SUBSCRIPTION = "policy.policies_paid"
+    }
+}

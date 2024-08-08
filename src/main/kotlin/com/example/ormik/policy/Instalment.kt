@@ -1,5 +1,10 @@
 package com.example.ormik.policy
 
+import com.example.ormik.outbox.OutboxMessage
+import com.example.ormik.outbox.OutboxMessageRepository
+import com.example.ormik.policy.InstallmentList.Companion.POLICIES_PAID_TOPIC
+import com.modivo.ads.proto.PoliciesPaidOuterClass.PoliciesPaid
+import com.modivo.ads.proto.policiesPaid
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.jdbc.repository.query.Query
@@ -10,6 +15,7 @@ import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.RoundingMode
+import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
@@ -40,6 +46,7 @@ data class InstallmentList(
     @MappedCollection(idColumn = "installment_list_id", keyColumn = "seq_index")
     val installments: List<Instalment>,
     val saldo: BigDecimal = BigDecimal("0.00"),
+    @Transient val events: List<Event> = emptyList(),
     @Version val version: Long = 0L,
 ) {
     fun isPaidTo(): LocalDate? =
@@ -69,6 +76,37 @@ data class InstallmentList(
 
         return copy(installments = processedInstallments, saldo = currentSaldo)
     }
+
+    companion object {
+        const val POLICIES_PAID_TOPIC = "installment.policies_paid"
+    }
+}
+
+data class PaidPoliciesEvent(
+    val policies: Set<PolicyRef>,
+    val paidTo: LocalDate,
+    val id: UUID = UUID.randomUUID(),
+    val timestamp: Instant,
+): Event {
+    override fun toOutboxMessage(): OutboxMessage =
+        OutboxMessage(
+            id,
+            POLICIES_PAID_TOPIC,
+            PoliciesPaid::class.qualifiedName!!,
+            toProto().toByteArray()
+        )
+
+    private fun toProto(): PoliciesPaid =
+        policiesPaid {
+            eventId = id.toString()
+            policiesId.addAll(policies.map { it.policy.toString() })
+            //paidTo = this@PaidPoliciesEvent.paidTo.toEpochSecond()
+            //timestamp = this@PaidPoliciesEvent.timestamp
+        }
+}
+
+interface Event {
+    fun toOutboxMessage(): OutboxMessage
 }
 
 data class PolicyRef(
