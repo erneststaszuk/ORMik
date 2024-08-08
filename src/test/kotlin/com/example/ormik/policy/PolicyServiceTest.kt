@@ -13,7 +13,7 @@ class PolicyServiceTest : IntegrationTest {
     lateinit var policyService: PolicyService
 
     @Autowired
-    lateinit var policyWalletRepository: PolicyWalletRepository
+    lateinit var installmentListRepository: InstallmentListRepository
 
     @ParameterizedTest
     @EnumSource
@@ -25,9 +25,11 @@ class PolicyServiceTest : IntegrationTest {
         policyService.createPolicy(policy, case.paymentInterval)
 
         // then
-        val policyInstalments = policyWalletRepository.findByPoliciesIdsContains(policy.id.toPolicyRef())
-        policyInstalments.instalments shouldHaveSize case.expectedInstalments
-        policyInstalments.instalments.sumOf { it.amount } shouldBeEqualTo policy.premium
+        val policyInstalments = installmentListRepository.findById(
+            installmentListRepository.findInstallmentListIdByPolicy(policy.id)
+        ).get()
+        policyInstalments.installments shouldHaveSize case.expectedInstalments
+        policyInstalments.installments.sumOf { it.amount } shouldBeEqualTo policy.premium
     }
 
     enum class CreatePolicyWithInstalmentsTestCase(
