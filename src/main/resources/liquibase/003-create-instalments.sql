@@ -10,9 +10,9 @@ CREATE TABLE instalment
 
 CREATE TABLE installment_list
 (
-    id      UUID PRIMARY KEY,
-    saldo   DECIMAL(10, 2) NOT NULL,
-    version BIGINT         NOT NULL
+    id         UUID PRIMARY KEY,
+    saldo      DECIMAL(10, 2) NOT NULL,
+    version    BIGINT         NOT NULL
 );
 
 CREATE TABLE policy_ref

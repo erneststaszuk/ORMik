@@ -42,6 +42,12 @@ data class InstallmentList(
     val saldo: BigDecimal = BigDecimal("0.00"),
     @Version val version: Long = 0L,
 ) {
+    fun isPaidTo(): LocalDate? =
+        installments.filter { it.isPaid }
+            .sortedBy { it.due }
+            .lastOrNull()
+            ?.due
+
     fun payAmount(amount: BigDecimal, currentDate: LocalDate): InstallmentList {
         require(amount > BigDecimal.ZERO && amount.scale() == 2)
 
@@ -76,7 +82,9 @@ interface InstallmentListRepository : CrudRepository<InstallmentList, UUID> {
 }
 
 @Service
-class InstalmentService(private val repository: InstallmentListRepository) {
+class InstalmentService(
+    private val repository: InstallmentListRepository,
+) {
     fun createInstalments(policies: Set<Policy>, paymentInterval: PaymentInterval) {
         if (policies.map { it.fromDate }.toSet().size != 1) {
             throw PoliciesHaveDifferingStartDates(policies)
@@ -123,8 +131,10 @@ class InstalmentService(private val repository: InstallmentListRepository) {
         )
     }
 
-    fun payAmount(installmentList: InstallmentList, amount: BigDecimal, currentDate: LocalDate): InstallmentList {
-        val changedInstallmentList = installmentList.payAmount(amount, currentDate)
+    fun payAmount(installmentListId: UUID, amount: BigDecimal, currentDate: LocalDate): InstallmentList {
+        val changedInstallmentList = repository.findById(installmentListId)
+            .get()
+            .payAmount(amount, currentDate)
         return repository.save(changedInstallmentList)
     }
 

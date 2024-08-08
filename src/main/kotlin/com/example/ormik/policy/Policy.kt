@@ -1,6 +1,8 @@
 package com.example.ormik.policy
 
 import com.example.ormik.infrastructure.Transactionally
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.data.annotation.Id
 import org.springframework.data.annotation.Version
 import org.springframework.data.jdbc.repository.query.Query
@@ -30,9 +32,22 @@ data class Policy(
     @Version val version: Long = 0L,
 ) {
     init {
+        require(thruDate > fromDate)
+    }
 
+    fun payTo(newPaidTo: LocalDate): Policy {
+        if (isPaidTo != null && newPaidTo < isPaidTo)
+            throw PolicyAlreadyIsPaidFurther(id, isPaidTo, newPaidTo)
+
+        return copy(isPaidTo = newPaidTo)
     }
 }
+
+data class PolicyAlreadyIsPaidFurther(
+    val policyId: UUID,
+    val isPaidTo: LocalDate,
+    val requestedPaidTo: LocalDate
+) : RuntimeException("""{"error": "PolicyAlreadyIsPaidFurther", "data": {"policyId": "$policyId", "isPaidTo": "$isPaidTo", "newPaidTo": "$requestedPaidTo"}""")
 
 data class PolicyParties(
     val holderParty: String,
@@ -64,15 +79,37 @@ class PolicyService(
     private val instalmentService: InstalmentService,
     private val transactionally: Transactionally,
 ) {
+    fun getPolicy(policyId: UUID): Policy =
+        repository.findById(policyId).get()
+
     fun createPolicy(policy: Policy, paymentInterval: PaymentInterval = PaymentInterval.ANNUAL): Policy =
         createPoliciesWallet(setOf(policy), paymentInterval)
             .single()
 
-    fun createPoliciesWallet(policies: Set<Policy>, paymentInterval: PaymentInterval = PaymentInterval.ANNUAL): Set<Policy> =
+    fun createPoliciesWallet(
+        policies: Set<Policy>,
+        paymentInterval: PaymentInterval = PaymentInterval.ANNUAL
+    ): Set<Policy> =
         transactionally {
             repository.saveAll(policies).toSet().also {
                 instalmentService.createInstalments(it, paymentInterval)
             }
         }
+
+    fun payPoliciesUpTo(policiesIds: Set<UUID>, payTo: LocalDate): Set<Policy> =
+        transactionally {
+            val policies = repository.findAllById(policiesIds)
+            val changedPolicies = policies.map { it.payTo(payTo) }
+
+            repository.saveAll(changedPolicies).toSet().also {
+                it.forEach {
+                    log.info(it.toString())
+                }
+            }
+        }
+
+    companion object {
+        val log: Logger = LoggerFactory.getLogger(PolicyService::class.java)
+    }
 }
 
