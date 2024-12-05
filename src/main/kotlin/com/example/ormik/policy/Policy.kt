@@ -64,7 +64,7 @@ data class SelectedRisk(
 interface PolicyRepository : CrudRepository<Policy, UUID>
 
 @Repository
-interface PolicyReportsRepository : org.springframework.data.repository.Repository<Policy, Long> {
+interface PolicyReportsRepository : CrudRepository<Policy, Long> {
 
     @Query("SELECT sum(premium) FROM policy")
     fun queryPremiumsSum(): BigDecimal
